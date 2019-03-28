@@ -8,6 +8,10 @@ validateCompoundList(compoundList, rt = FALSE, ccs = FALSE)
 }
 \arguments{
 \item{compoundList}{List of compounds that shall be added to DB}
+
+\item{rt}{Boolean value if RT is used}
+
+\item{ccs}{Boolean value if CCS is used}
 }
 \value{
 Boolean value if list is suitable for upload to SQLiteDB

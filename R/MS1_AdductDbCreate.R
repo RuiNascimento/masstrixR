@@ -52,6 +52,8 @@ createDb <- function(compoundList, dbName) {
 #' This function validates if all required columns are in place and of the right format. Specific columns are added, if required (e.g. KEGG Ids)
 #'
 #' @param compoundList List of compounds that shall be added to DB
+#' @param rt Boolean value if RT is used
+#' @param ccs Boolean value if CCS is used
 #' @return Boolean value if list is suitable for upload to SQLiteDB
 #' @examples
 #' validateCompoundList(compoundList)
@@ -260,8 +262,16 @@ prepareCompoundList <-
   }
 
 
-#' iso list
+#' This function generates isotopically labeled version of a given compound list. Calculations of isotopic exat mass are based on the sum formula and a selected isotope label. Metabolites can be either fully labeled or partially. In the later case the number of labeled atoms has to be defined. If the number exceeds the number of atoms a fully labeled molecule is produced.
 #'
+#' @param compoundList List of compounds that shall be added to DB
+#' @param isoLabel Either "full" or "partial"
+#' @param labeledElement String indicating with element shall be replaced with a labeled version.
+#' @param noOfLabel A vector containing the number of labels.
+#'
+#'
+#'
+#' @author Michael Witting, \email{michael.witting@@helmholtz-muenchen.de}
 #' @export
 prepareIsoCompoundList <- function(compoundList, isoLabel = "full", labeledElement, noOfLabel = NULL) {
 

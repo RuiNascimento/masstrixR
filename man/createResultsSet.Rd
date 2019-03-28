@@ -6,7 +6,7 @@
 \usage{
 createResultsSet(querySpectrum, queryResults, align = TRUE,
   mzTol = 0.005, mzTolType = "abs", plotIt = TRUE,
-  storePlot = FALSE, prefix = "", dataPath = "", title = NA)
+  savePlot = FALSE, prefix = "", dataPath = "", title = NA)
 }
 \arguments{
 \item{querySpectrum}{A Spectrum2 object}

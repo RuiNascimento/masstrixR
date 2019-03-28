@@ -215,6 +215,11 @@ calculateRefKendrickMassDefect <- function(mz, refkmd) {
 #' @export
 checkRmkd <- function(rmkd, error = 0.15) {
 
+  # rmkd can be only 0 or negative integer
+  if(rmkd > 0) {
+    return(FALSE)
+  }
+
   # check if rmkd is in error range
   remainder <- rmkd %% -1
 

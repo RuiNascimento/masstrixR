@@ -9,7 +9,7 @@
 #'
 #' @author Michael Witting, \email{michael.witting@@helmholtz-muenchen.de}
 #'
-#' @importClassesFrom MSnbase Spectrum2 Spectra
+#' @import MSnbase
 #' @export
 readMassBankFile <- function(pathToMBFile) {
 

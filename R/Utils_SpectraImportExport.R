@@ -1,54 +1,71 @@
-writeSirius <- function(spectraList, file) {
+#' This function allows to read mgf files which contain additional fields to standard
+#' ased on the code contributed by Guangchuang Yu \email{guangchuangyu@@gmail.com}
+#' Modified by Sebastian Gibb \email{mail@@sebastiangibb.de}
+#' Modified by Michael Witting \email{michael.witting@@helmholtz-muenchen.de}
+#'
+#'
+#' @import MSnbase
+#' @export
+readAnnotatedMgfData <- function(filename,
+                                 filterAddFields = NULL,
+                        centroided = TRUE,
+                        smoothed = FALSE,
+                        cache = 1) {
 
-  ## sanity checks
-  if(!class(isoPatternSpectra)[1] == "Spectra") {
-    stop("spectraList should be of class Spectra")
+  mgf <- scan(file = filename, what = "",
+              sep = "\n", quote = "",
+              allowEscapes = FALSE,
+              quiet = TRUE)
+
+  ## From http://www.matrixscience.com/help/data_file_help.html#GEN
+  ## Comment lines beginning with one of the symbols #;!/ can be included,
+  ## but only outside of the BEGIN IONS and END IONS statements that delimit an MS/MS dataset.
+  cmts <- grep("^[#;!/]", mgf)
+  if (length(cmts))
+    mgf <- mgf[-cmts]
+
+  # find begin and end of spectra
+  begin <- grep("BEGIN IONS", mgf) + 1L
+  end <- grep("END IONS", mgf) - 1L
+
+  n <- length(begin)
+
+  # prepare listes
+  spectra <- vector("list", length = n)
+  fdata <- vector("list", length = n)
+  addFieldsVec <- vector("list", length = n)
+
+  # iterate over all spectra in .mgfi file
+  for (i in seq(along = spectra)) {
+
+    specInfo <- extractMgfSpectrum2Info(mgf[begin[i]:end[i]],
+                                        centroided = centroided,
+                                        filterAddFields =  filterAddFields)
+    spectra[[i]] <- specInfo$spectrum
+    fdata[[i]] <- specInfo$fdata
+    addFieldsVec[[i]] <- specInfo$addData
+
   }
 
-  ## get unique cluster ids in the spectraList object
-  exportClusters <- unique(spectraList@elementMetadata$cluster_id)
+  # convert
+  fdata <- do.call(rbind, fdata)
+  addFieldsVec <- do.call(rbind, addFieldsVec)
 
-  ## prepare for writing
-  con <- file(file, "w")
-  on.exit(close(con))
+  # create Spectra object
+  ms2Spectra <- Spectra(spectra)
 
-  # custom cat function
-  .cat <- function(..., file = con, sep = "", append = TRUE) {
-    cat(..., file = file, sep = sep, append = append)
-  }
+  mcols(ms2Spectra) <- as.data.frame(addFieldsVec)
 
-  # iterate over all cluster
-  for(exportCluster in exportClusters) {
+  # return SpectraList
+  return(ms2Spectra)
 
-    print(exportCluster)
-
-    # get all spectra associated with this cluster
-    clusterSpectra <- spectraList[which(spectraList@elementMetadata$cluster_id == exportCluster)]
-
-    for(i in 1:length(clusterSpectra)) {
-
-      # write header
-      .cat("\nBEGIN IONS\n")
-      .cat("PEPMASS=", clusterSpectra[i]@elementMetadata$mz, "\n")
-
-      # dependent on type MSLEVEL=1 or 2
-      if(clusterSpectra[i]@elementMetadata$type == "iso") {
-        .cat("MSLEVEL=1\n")
-      } else if(clusterSpectra[i]@elementMetadata$type == "ms2") {
-        .cat("MSLEVEL=2\n")
-      }
-
-      .cat("CHARGE=1+\n")
-      .cat("NAME=", clusterSpectra[i]@elementMetadata$cluster_id, "\n")
-      .cat(paste(mz(clusterSpectra[[i]]), intensity(clusterSpectra[[i]]), collapse = "\n"))
-      .cat("\nEND IONS\n")
-    }
-
-  }
 }
 
-
-extractMgfSpectrum2Info <- function(mgf, centroided, addFields = NULL) {
+#'
+#'
+#'
+#' @import MSnbase
+extractMgfSpectrum2Info <- function(mgf, centroided, filterAddFields = NULL) {
 
   # grep description
   desc.idx <- grep("=", mgf)
@@ -66,35 +83,40 @@ extractMgfSpectrum2Info <- function(mgf, centroided, addFields = NULL) {
   desc <- setNames(substring(desc, r + 1L, nchar(desc)), substring(desc, 1L, r - 1L))
   fdata <- desc
 
+  # some data prep
   desc[c("PEPMASSMZ", "PEPMASSINT")] <- strsplit(desc["PEPMASS"], "[[:space:]]+")[[1L]][1:2]
+  desc["CHARGE"] <- sub("[+-]", "", desc["CHARGE"])
 
   # select only values of interest and convert to numeric (base fields)
-  desc["CHARGE"] <- sub("[+-]", "", desc["CHARGE"])
   voi <- c("RTINSECONDS", "CHARGE", "SCANS", "PEPMASSMZ", "PEPMASSINT")
   desc.base <- setNames(as.numeric(desc[voi]), voi)
   desc.base[is.na(desc.base[voi])] <- 0L
   cat(".")
 
-  if(!is.null(addFields)) {
+  # select additional values
+  fieldNames <- names(desc)
+  addFieldNames <- fieldNames[!fieldNames %in% c(voi, "PEPMASS", "TITLE")]
 
-    desc.add <- setNames(desc[addFields], addFields)
-    cat(".")
-
-  } else {
-    desc.add <- NA
+  # filter only fields wanted by user
+  if(!is.null(filterAddFields)) {
+    addFieldNames <- filterAddFields
   }
+
+  # get additional descriptors
+  desc.add <- setNames(desc[addFieldNames], addFieldNames)
 
 
   # create spectrum
-  sp <- Spectrum2_mz_sorted(rt = unname(desc["RTINSECONDS"]),
-                            scanIndex = unname(as.integer(desc["SCANS"])),
-                            precursorMz = unname(desc["PEPMASSMZ"]),
-                            precursorIntensity = unname(desc["PEPMASSINT"]),
-                            precursorCharge = unname(as.integer(desc["CHARGE"])),
-                            mz = ms[, 1L],
-                            intensity = ms[, 2L],
-                            fromFile = 1L,
-                            centroided = centroided)
+  sp <- new("Spectrum2",
+            rt = as.numeric(unname(desc["RTINSECONDS"])),
+            scanIndex = as.integer(unname(as.integer(desc["SCANS"]))),
+            precursorMz = as.numeric(unname(desc["PEPMASSMZ"])),
+            precursorIntensity = as.numeric(unname(desc["PEPMASSINT"])),
+            precursorCharge = as.integer(unname(as.integer(desc["CHARGE"]))),
+            mz = ms[, 1L],
+            intensity = ms[, 2L],
+            fromFile = 1L,
+            centroided = centroided)
 
   # return values
   return(list(spectrum = sp, fdata = fdata, addData = desc.add))

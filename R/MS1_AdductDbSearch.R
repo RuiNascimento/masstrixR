@@ -229,6 +229,9 @@ mzSearch <- function(peakList, dbFileName, mode = "onDisk",
     ms1annotation$ccsRelError <- (ms1annotation$CCS - ms1annotation$ccs_db) / ms1annotation$ccs_db
   }
 
+  # close everything
+  on.exit(DBI::dbDisconnect(mydb))
+
   # return results
   return(ms1annotation)
 }

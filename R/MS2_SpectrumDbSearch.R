@@ -136,7 +136,7 @@ searchByPrecursor <- function(precursorMz, ms2dbFileName, mzTol = 0.005, mzTolTy
 #'
 #' @export
 createResultsSet <- function(querySpectrum, queryResults, align = TRUE, mzTol = 0.005, mzTolType = "abs",
-                             plotIt = TRUE, storePlot = FALSE, prefix = "", dataPath = "", title = NA) {
+                             plotIt = TRUE, savePlot = FALSE, prefix = "", dataPath = "", title = NA) {
 
   # create empty data for results
   resultSet <- data.frame()
@@ -168,21 +168,34 @@ createResultsSet <- function(querySpectrum, queryResults, align = TRUE, mzTol = 
                       round(forwardScore * 1000, 0))
     }
 
+    print(dataPath)
+
+    plotPath <- paste0(dataPath,
+                       "\\",
+                       make.names(paste0(prefix, "_", queryResults[i]@elementMetadata$name)),
+                       ".png")
+
+    #plotPath <- dataPath
+
+    print(plotPath)
+
+
+
     # make mirror plot
     makeMirrorPlot(querySpectrum, queryResults[[i]],
-                         align = align, mzTol = mzTol, treshold = treshold, title = title, plotIt = plotIt)
+                         align = align, mzTol = mzTol, treshold = treshold, title = title, plotIt = plotIt, savePlot = savePlot, fileName = plotPath)
 
 
-    # store plot if TRUE
-    if(storePlot) {
-      plotPath <- paste0(dataPath, "\\",
-                         make.names(paste0(prefix,
-                                           "_",
-                                           queryResults[i]@elementMetadata$name),
-                                    ".png"))
-      dev.copy(png, plotName, width = 1000, height = 500)
-      dev.off()
-    }
+    # # store plot if TRUE
+    # if(storePlot) {
+    #   plotPath <- paste0(dataPath, "\\",
+    #                      make.names(paste0(prefix,
+    #                                        "_",
+    #                                        queryResults[i]@elementMetadata$name),
+    #                                 ".png"))
+    #   dev.copy(png, plotName, width = 1000, height = 500)
+    #   dev.off()
+    # }
 
     # add to result set
     resultSet <- rbind.data.frame(resultSet, cbind.data.frame(prefix = prefix,

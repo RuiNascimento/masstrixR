@@ -4,7 +4,7 @@
 #' @import ggplot2
 #' @import grid
 #' @export
-makeMirrorPlot <- function(x, y, align = FALSE, plotIt = FALSE, mzTol = 0.005, treshold = 0.01, title = "Mirrorplot", xlim = NULL, ...) {
+makeMirrorPlot <- function(x, y, align = FALSE, plotIt = FALSE, savePlot = FALSE, fileName = "plot.png", mzTol = 0.005, treshold = 0.01, title = "Mirrorplot", xlim = NULL, ...) {
 
   if(align) {
 
@@ -55,6 +55,11 @@ makeMirrorPlot <- function(x, y, align = FALSE, plotIt = FALSE, mzTol = 0.005, t
         plot(p1)
       }
 
+      if(savePlot) {
+        print(paste0("saving plot to: ", fileName))
+        ggsave(fileName, plot = p1, width = 150, height = 75, units = "mm", dpi = 300, limitsize = FALSE)
+      }
+
 
     } else {
 
@@ -85,6 +90,11 @@ makeMirrorPlot <- function(x, y, align = FALSE, plotIt = FALSE, mzTol = 0.005, t
 
       if(plotIt) {
         plot(p1)
+      }
+
+      if(savePlot) {
+        print(paste0("saving plot to: ", fileName))
+        ggsave(fileName, plot = p1, width = 150, height = 75, units = "mm", dpi = 300, limitsize = FALSE)
       }
 
     }
