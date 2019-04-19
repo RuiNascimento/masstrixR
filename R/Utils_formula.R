@@ -114,6 +114,9 @@ parseChemFormula <- function(chemFormula) {
   parsedChemFormula <- numbers
   names(parsedChemFormula) <- elements
 
+  # remove atoms that might have a count of 0
+  parsedChemFormula <- parsedChemFormula[which(parsedChemFormula > 0)]
+
   return(parsedChemFormula)
 }
 
