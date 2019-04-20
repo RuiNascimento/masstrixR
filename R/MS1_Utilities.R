@@ -171,6 +171,56 @@ calculateKendrickMassDefect <- function(mz) {
 
 }
 
+#' Calculate the Kendrick Mass
+#'
+#' This function calculates the Kendrick mass for a give mass.
+#'
+#' @param mz Mass for which the KM shall be calculated
+#'
+#' @example
+#' xxx
+#'
+#' @author Michael Witting, \email{michael.witting@@helmholtz-muenchen.de}
+#'
+#' @seealso \code{\link{calculateRefKendrickMassDefect}}
+#' @seealso \code{\link{calculateKendrickMassDefect}}
+#' @seealso \code{\link{calculateNominalKendrickMass}}
+#' @seealso \code{\link{checkRmkd}}
+#'
+#' @export
+calculateKendrickMass <- function(mz) {
+
+  # calculate KM
+  kendrickMass <- mz * 14 / 14.01565
+
+  # return Kendrick mass
+  return(kendrickMass)
+}
+
+#' Calculate nominal Kendrick Mass
+#'
+#' This function calculates the nominal Kendrick Mass
+#'
+#' @param mz Mass for which the nominal KM shall be calculated
+#'
+#' @example
+#' xxx
+#'
+#' @export
+calculateNominalKendrickMass <- function(mz) {
+
+  # calculate KM
+  kendrickMass <- mz * 14 / 14.01565
+
+  # nominal KM
+  nominalKendrickMass <- as.integer(kendrickMass)
+
+  # return nominal Kendrick Mass
+  return(nominalKendrickMass)
+}
+
+
+
 #' Calculate referenced Kendrick Mass Defect
 #'
 #' This function calculates a referenced Kendrick Mass Defect (RKMD) for a given mass and a given reference KMD.
