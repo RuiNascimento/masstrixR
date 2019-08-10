@@ -16,9 +16,7 @@
 #' @export
 createDb <- function(compoundList, dbName) {
 
-  ##############################################################################
   # get/generate required values
-  ##############################################################################
   # generate filename
   dbFileName <- paste0(dbName, ".sqlite")
 
@@ -28,9 +26,7 @@ createDb <- function(compoundList, dbName) {
   # add prefix db to all column names
   colnames(dbupload) <- paste(colnames(dbupload), "db", sep = "_")
 
-  ##############################################################################
   # Generate SQLite DB
-  ##############################################################################
   # upload to DB
   mydb <- DBI::dbConnect(RSQLite::SQLite(), dbFileName)
   DBI::dbWriteTable(mydb, "adducts", dbupload, overwrite = TRUE)
@@ -38,9 +34,7 @@ createDb <- function(compoundList, dbName) {
   # disconnect DB
   DBI::dbDisconnect(mydb)
 
-  ##############################################################################
   # Return path to SQLite file
-  ##############################################################################
   # return the filename
   return(dbFileName)
 }
@@ -71,9 +65,7 @@ validateCompoundList <-
     # set initial value
     validationCheck <- FALSE
 
-    ############################################################################
     # Sanity Checks on input
-    ############################################################################
     # correct column headers in compound list?
     if (!all(
       c(
@@ -153,9 +145,8 @@ prepareCompoundList <-
              rt = FALSE,
              ccs = FALSE,
              extId = FALSE) {
-    ############################################################################
+
     # Sanity Checks on input
-    ############################################################################
     # correct column headers in compound list?
     if (!all(
       c(
@@ -197,10 +188,7 @@ prepareCompoundList <-
       stop("ccs option requires individual adduct annotation")
     }
 
-
-    ############################################################################
     # add missing columns to have common input format
-    ############################################################################
     # add rt column, even if false
     if (rt == FALSE) {
       print("no RT")
@@ -219,9 +207,7 @@ prepareCompoundList <-
       compoundList$chebi <- NA
     }
 
-    ############################################################################
     # check if external ids are present or fetch them from CTS
-    ############################################################################
     # are external ids part of the compound list
     if (extId == TRUE &
       !all(c("kegg", "hmdb", "chebi") %in% colnames(compoundList))) {
@@ -252,23 +238,19 @@ prepareCompoundList <-
       }
     }
 
-    ############################################################################
     # calculate adduct masses and genereate list for upload
-    ############################################################################
     # create adduct
-    newCompoundList <- calculateAdductMasses(compoundList, adductList)
+    newCompoundList <- .calculateAdductMasses(compoundList, adductList)
 
     return(newCompoundList)
-  }
 
-
-
+}
 
 
 #'
 #'
 #'
-calculateAdductMasses <- function(compoundList, adductList) {
+.calculateAdductMasses <- function(compoundList, adductList) {
 
   if (c("adducts") %in% colnames(compoundList)) {
 
@@ -286,7 +268,7 @@ calculateAdductMasses <- function(compoundList, adductList) {
 
 }
 
-#'
+
 #'
 #'
 #'
@@ -294,9 +276,7 @@ calculateAdductMasses <- function(compoundList, adductList) {
 
   print("individual adducts")
 
-  ############################################################################
   # create required variables
-  ############################################################################
   # data frame for final data
   newCompoundList <- data.frame()
 
@@ -349,11 +329,9 @@ calculateAdductMasses <- function(compoundList, adductList) {
 
   return(newCompoundList)
 
-
-
 }
 
-#'
+
 #'
 #'
 #'
@@ -361,9 +339,7 @@ calculateAdductMasses <- function(compoundList, adductList) {
 
   print("commmon adducts")
 
-  ############################################################################
   # create required variables
-  ############################################################################
   # data frame for final data
   newCompoundList <- data.frame()
 
@@ -406,6 +382,5 @@ calculateAdductMasses <- function(compoundList, adductList) {
   }
 
   return(newCompoundList)
-
 
 }

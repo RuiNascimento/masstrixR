@@ -204,29 +204,46 @@ mzSearch <- function(peakList, dbFileName, mode = "onDisk",
 
     # calculate absolute and relative m/z error
     ms1annotation$mzAbsError <- ms1annotation$mz - ms1annotation$adductMass_db
-    ms1annotation$mzRelError <- (ms1annotation$mz - ms1annotation$adductMass_db) / ms1annotation$adductMass_db * 1000000
+    ms1annotation$mzRelError <- (ms1annotation$mz - ms1annotation$adductMass_db) / ms1annotation$adductMass_db * 1e6
+
   } else if (c("m.z") %in% colnames(peakList)) {
 
     # calculate absolute and relative m/z error
     ms1annotation$mzAbsError <- ms1annotation$m.z - ms1annotation$adductMass_db
-    ms1annotation$mzRelError <- (ms1annotation$m.z - ms1annotation$adductMass_db) / ms1annotation$adductMass_db * 1000000
+    ms1annotation$mzRelError <- (ms1annotation$m.z - ms1annotation$adductMass_db) / ms1annotation$adductMass_db * 1e6
+
   } else if (c("mzmed") %in% colnames(peakList)) {
 
     # calculate absolute and relative m/z error
     ms1annotation$mzAbsError <- ms1annotation$mzmed - ms1annotation$adductMass_db
-    ms1annotation$mzRelError <- (ms1annotation$mzmed - ms1annotation$adductMass_db) / ms1annotation$adductMass_db * 1000000
+    ms1annotation$mzRelError <- (ms1annotation$mzmed - ms1annotation$adductMass_db) / ms1annotation$adductMass_db * 1e6
+
   }
 
   # calculate RT error
   if (rt == TRUE) {
+
     ms1annotation$rtAbsError <- ms1annotation$RT - ms1annotation$rt_db
     ms1annotation$rtRelError <- (ms1annotation$RT - ms1annotation$rt_db) / ms1annotation$rt_db
+
+  } else {
+
+    ms1annotation$rtAbsError <- NA
+    ms1annotation$rtRelError <- NA
+
   }
 
   # calculate RT error
   if (ccs == TRUE) {
+
     ms1annotation$ccsAbsError <- ms1annotation$CCS - ms1annotation$ccs_db
     ms1annotation$ccsRelError <- (ms1annotation$CCS - ms1annotation$ccs_db) / ms1annotation$ccs_db
+
+  } else {
+
+    ms1annotation$ccsAbsError <- NA
+    ms1annotation$ccsRelError <- NA
+
   }
 
   # close everything
