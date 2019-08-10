@@ -16,20 +16,105 @@
 #'
 #' @seealso \code{\link{matchMassDiff}}
 #' @export
-matchMz <- function(posMz, negMz, posAdducts, negAdducts, mzTol = 0.005, mzTolType = "abs") {
+match_mz_intra <- function(mz1, mz2, adducts, mzTol = 0.005, mzTolType = "abs") {
 
   # sanity checks
   # check if adduct definitions are good
-  if(!all(posAdducts %in% getAllPosModeAdducts())) {
+  adduct_names <- metabolomicsUtils::get_adduct_names(mode = "all")
+
+  if(!all(adducts %in% adduct_names) | !all(adducts %in% adduct_names)) {
+    stop("one or more adducts is not fitting")
+  }
+
+  # make combinations
+  adductCombinations <- as.data.frame(t(combn(adducts, 2)))
+
+  # make df
+  df <- data.frame(adduct1 = as.character(adductCombinations$V1),
+                   adduct2 = as.character(adductCombinations$V2),
+                   mz1 = mz1,
+                   mz2 = mz2, stringsAsFactors = FALSE)
+
+  # iterate and calculate all combinatoins
+  for(i in 1:nrow(df)) {
+
+    # from adduct to neutral
+    df$neutral1_from_adduct1[i] <- metabolomicsUtils::calc_neutral_mass(df$mz1[i], df$adduct1[i])
+    df$neutral2_from_adduct2[i] <- metabolomicsUtils::calc_neutral_mass(df$mz2[i], df$adduct2[i])
+
+    # from neutral to adduct
+    df$adduct2_from_neutral1[i] <- metabolomicsUtils::calc_adduct_mass(df$neutral1_from_adduct1[i], df$adduct2[i])
+    df$adduct1_from_neutral2[i] <- metabolomicsUtils::calc_adduct_mass(df$neutral2_from_adduct2[i], df$adduct1[i])
+
+  }
+
+  # select fitting adducts
+  if(mzTolType == "abs") {
+
+    filteredDf <- df[which(abs(df$mz1 - df$adduct1_from_neutral2) < mzTol & abs(df$mz2 - df$adduct2_from_neutral1) < mzTol),]
+
+  } else if(mzTolType == "ppm") {
+
+    filteredDf <- NULL
+
+  } else {
+    stop("unknown mzTolType")
+  }
+
+  if(!is.null(filteredDf) & nrow(filteredDf) > 0) {
+
+    matchingResult <- ""
+
+    for(i in 1:nrow(filteredDf)) {
+
+      if(i == 1) {
+        matchingResult <- paste0(filteredDf$adduct1[i], "<->", filteredDf$adduct2[i])
+      } else {
+        matchingResult <- paste0(matchingResult, " / ", filteredDf$adduct1[i], "<->", filteredDf$adduct2[i])
+      }
+    }
+
+    # return resulting DF
+    return(matchingResult)
+
+  } else {
+
+    return(NA)
+
+  }
+}
+
+#' Checking masses from different ion modes
+#'
+#' This function is used to match two masses from the positive and negative ionization mode to check it they are potentially derived from the same metabolite. Based on the given adducts, all combinations are tested from positive to negative ion mode and the other way. If for both cases the mass error is below the given mass error it is assumed that the masses are derived from the same metabolite.
+#'
+#' @param posMz m/z value of positive ionization mode
+#' @param negMz m/z value of negative ionization mode
+#' @param posAdducts vector with adducts that are used for the positive ionization mode
+#' @param negAdducts vector with adducts that are used for the negative ionization mode
+#' @param mzTol m/z error, numeric value
+#' @param mzTolType type of error used, absolute (abs) or relative (ppm)
+#'
+#' @examples
+#' xxx
+#'
+#' @author Michael Witting, \email{michael.witting@@helmholtz-muenchen.de}
+#'
+#' @seealso \code{\link{matchMassDiff}}
+#' @export
+match_mz_inter <- function(posMz, negMz, posAdducts, negAdducts, mzTol = 0.005, mzTolType = "abs") {
+
+  # sanity checks
+  # check if adduct definitions are good
+  adduct_names <- metabolomicsUtils::get_adduct_names(mode = "all")
+
+  if(!all(posAdducts %in% adduct_names)) {
     stop("one or more adducts in the posAdducts in not fitting")
   }
 
-  if(!all(negAdducts %in% getAllNegModeAdducts())) {
+  if(!all(negAdducts %in% adduct_names)) {
     stop("one or more adducts in the negAdducts in not fitting")
   }
-
-  # get all adduct calculation rules
-  adductCalc <- getAdductCalc()
 
   # make combinations
   adductCombinations <- expand.grid(posAdducts, negAdducts)
@@ -43,21 +128,18 @@ matchMz <- function(posMz, negMz, posAdducts, negAdducts, mzTol = 0.005, mzTolTy
   # iterate and calculate all combinatoins
   for(i in 1:nrow(df)) {
 
-    posAdduct <- df$posAdduct[i]
-    negAdduct <- df$negAdduct[i]
-
     # from pos to neg
-    df$theoNeutralFromPos[i] <- (df$posMz[i] - as.numeric(adductCalc[[posAdduct]][2])) / as.numeric(adductCalc[[posAdduct]][1])
-    df$theoNegFromPos[i] <- df$theoNeutralFromPos[i] * as.numeric(adductCalc[[negAdduct]][1]) + as.numeric(adductCalc[[negAdduct]][2])
+    df$neutral_from_pos[i] <- metabolomicsUtils::calc_neutral_mass(df$posMz[i], df$posAdduct[i])
+    df$neutral_from_neg[i] <- metabolomicsUtils::calc_neutral_mass(df$negMz[i], df$negAdduct[i])
 
-    # from neg to pos
-    df$theoNeutralFromNeg[i] <- (df$negMz[i] - as.numeric(adductCalc[[negAdduct]][2])) / as.numeric(adductCalc[[negAdduct]][1])
-    df$theoPosFromNeg[i] <- df$theoNeutralFromNeg[i] * as.numeric(adductCalc[[posAdduct]][1]) + as.numeric(adductCalc[[posAdduct]][2])
+    df$neg_from_pos[i] <- metabolomicsUtils::calc_adduct_mass(df$neutral_from_pos[i], df$negAdduct[i])
+    df$pos_from_neg[i] <- metabolomicsUtils::calc_adduct_mass(df$neutral_from_neg[i], df$posAdduct[i])
+
   }
 
   # select fitting adducts
   if(mzTolType == "abs") {
-    filteredDf <- df[which(abs(df$negMz - df$theoNegFromPos) < mzTol & abs(df$posMz - df$theoPosFromNeg) < mzTol),]
+    filteredDf <- df[which(abs(df$negMz - df$neg_from_pos) < mzTol & abs(df$posMz - df$pos_from_neg) < mzTol),]
   } else if(mzTolType == "ppm") {
     filteredDf <- NULL
   } else {
@@ -82,6 +164,7 @@ matchMz <- function(posMz, negMz, posAdducts, negAdducts, mzTol = 0.005, mzTolTy
     return(NA)
   }
 }
+
 
 #' Checking for mass diferences
 #'
@@ -218,8 +301,6 @@ calculateNominalKendrickMass <- function(mz) {
   # return nominal Kendrick Mass
   return(nominalKendrickMass)
 }
-
-
 
 #' Calculate referenced Kendrick Mass Defect
 #'
