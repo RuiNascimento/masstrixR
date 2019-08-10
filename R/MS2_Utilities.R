@@ -199,7 +199,12 @@ makeDiffSpectra <- function(x, y, align = TRUE, mzTol = 0.005, mzTolType = "abs"
 
 }
 
+#' This function uses CAMERA to identify isotopes in a mz intensity pair.
 #'
+#' @param mz
+#' @param int
+#' @param mzTol Maximum allowed tolerance in Da or ppm
+#' @param mzTolType Defines the error type for m/z search, "abs" is used for absolute mass error, "ppm" for relative error
 #'
 #' @import xcms
 #'
@@ -251,7 +256,13 @@ filterIsotopePeaks <- function(mz, int, mzTol = 0.005, mzTolType = "abs") {
   return(list(mz, int))
 }
 
+#' This function is used to clean MS2 spectra in different ways. First, if the MS2 contains "fragment" m/z values above the precursor m/z (option "removeAbovePrecursor"). Second, isotopic peaks in the MS2 spectra can be removed ("isotopeFilitering"). Lastly, peaks below a certain treshold are removed ("tresholdFiltering").
 #'
+#' @param x A Spectrum2 object to work on
+#' @param cleanFunction A string either "removeAbovePrecursor", "isotopeFiltering" or "tresholdFiltering"
+#' @param precursorDistance A double indicating from which point above which "fragments" should be removed
+#' @param mzTol Maximum allowed tolerance in Da or ppm
+#' @param mzTolType Defines the error type for m/z search, "abs" is used for absolute mass error, "ppm" for relative error
 #'
 #' @export
 cleanSpectra <- function(x, cleanFunction = "removeAbovePrecursor", treshold, precursorDistance = 5, mzTol = 0.005, mzTolType = "abs") {

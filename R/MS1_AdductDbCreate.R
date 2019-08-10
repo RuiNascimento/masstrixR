@@ -262,94 +262,7 @@ prepareCompoundList <-
   }
 
 
-#' This function generates isotopically labeled version of a given compound list. Calculations of isotopic exat mass are based on the sum formula and a selected isotope label. Metabolites can be either fully labeled or partially. In the later case the number of labeled atoms has to be defined. If the number exceeds the number of atoms a fully labeled molecule is produced.
-#'
-#' @param compoundList List of compounds that shall be added to DB
-#' @param isoLabel Either "full" or "partial"
-#' @param labeledElement String indicating with element shall be replaced with a labeled version.
-#' @param noOfLabel A vector containing the number of labels.
-#'
-#'
-#'
-#' @author Michael Witting, \email{michael.witting@@helmholtz-muenchen.de}
-#' @export
-prepareIsoCompoundList <- function(compoundList, isoLabel = "full", labeledElement, noOfLabel = NULL) {
 
-  # make new data frame for iso-labeled compounds
-  isoCompoundList <- data.frame()
-
-  # iterate through compound list
-  for(i in 1:nrow(compoundList)) {
-
-    #print(compoundList$id[i])
-
-    if(is.na(compoundList$formula[i])) {
-      next()
-    }
-
-    #parse chemical formula
-    parsedChemFormula <- parseChemFormula(compoundList$formula[i])
-
-    #check if all elements are present in element mass list
-    elementMassList <- getElementMassList()
-
-    if(!all(names(parsedChemFormula) %in% names(elementMassList))) {
-      next()
-    }
-
-    # check different cases
-    if(isoLabel == "full") {
-
-      # calculate iso mass
-      isoMass <- calculateIsoLabelMass_Formula(compoundList$formula[i], labeledElement = labeledElement)
-
-      # make new metabolite name
-      name_new <- makeIsoName(compoundList$name[i], labeledElement, isoLabel = isoLabel, noOfLabel = noOfLabel)
-
-      # add to data frame
-      isoCompoundList <- rbind.data.frame(isoCompoundList, cbind.data.frame(id = compoundList$id[i],
-                                                                            smiles = compoundList$smiles[i],
-                                                                            inchi = compoundList$inchi[i],
-                                                                            inchikey = compoundList$inchikey[i],
-                                                                            formula = compoundList$formula[i],
-                                                                            name = name_new,
-                                                                            exactmass = isoMass))
-
-    } else if(isoLabel == "partial") {
-
-      # check if number of labels is supplied
-      if(is.null(noOfLabel)) {
-        stop("missing no of labels")
-      }
-
-      # iterate through the possible number of labels
-      for(label in noOfLabel) {
-        # calculate iso mass
-        isoMass <- calculateIsoLabelMass_Formula(compoundList$formula[i], labeledElement = labeledElement, noOfLabel = label)
-
-        # make new metabolite name
-        name_new <- makeIsoName(compoundList$name[i], labeledElement, isoLabel = isoLabel, noOfLabel = label)
-
-        # add to data frame
-        isoCompoundList <- rbind.data.frame(isoCompoundList, cbind.data.frame(id = compoundList$id[i],
-                                                                              smiles = compoundList$smiles[i],
-                                                                              inchi = compoundList$inchi[i],
-                                                                              inchikey = compoundList$inchikey[i],
-                                                                              formula = compoundList$formula[i],
-                                                                              name = name_new,
-                                                                              exactmass = isoMass))
-      }
-
-    } else {
-
-      stop("unknown label pattern")
-
-    }
-  }
-
-  #return new list
-  return(isoCompoundList)
-}
 
 
 #'
@@ -357,94 +270,75 @@ prepareIsoCompoundList <- function(compoundList, isoLabel = "full", labeledEleme
 #'
 calculateAdductMasses <- function(compoundList, adductList) {
 
+  if (c("adducts") %in% colnames(compoundList)) {
+
+    newCompoundList <- .create_list_individual(compoundList)
+
+
+  } else {
+
+    newCompoundList <- .create_list_common(compoundList, adductList)
+
+  }
+
+  # return new compound list
+  return(newCompoundList)
+
+}
+
+#'
+#'
+#'
+#'
+.create_list_individual <- function(compoundList) {
+
+  print("individual adducts")
+
   ############################################################################
   # create required variables
   ############################################################################
   # data frame for final data
   newCompoundList <- data.frame()
 
-  # get adduct calculation list
-  adductCalc <- getAdductCalc()
-
-  if (c("adducts") %in% colnames(compoundList)) {
-
-    print("individual adducts")
-
-    # iterate over compound list and add to dbupload
-    for (i in 1:nrow(compoundList)) {
-      if (grepl(",", compoundList$adducts[i])) {
-        adductList <- stringr::str_split(compoundList$adducts[i], ",")[[1]]
-      } else {
-        adductList <- compoundList$adducts[i]
-      }
-
-      #check exact mass
-      if(is.na(compoundList$exactmass[i])) {
-        compoundList$exactmass[i] <- calculateExactMass(compoundList$formula[i])
-      }
-
-      # iterate over adducts and create a query list
-      for (adduct in adductList) {
-        # generate list
-        clipboard <- data.frame(
-          metaboliteID = compoundList$id[i],
-          adductType = adduct,
-          adductMass = compoundList$exactmass[i] * as.numeric(adductCalc[[adduct]][1]) + as.numeric(adductCalc[[adduct]][2]),
-          neutralMass = compoundList$exactmass[i],
-          neutralFormula = compoundList$formula[i],
-          ionFormula = calcAdductFormula(compoundList$formula[i], adduct),
-          metaboliteName = stringr::str_c(compoundList$name[i], adduct, sep = " "),
-          inchikey = compoundList$inchikey[i],
-          inchi = compoundList$inchi[i],
-          smiles = compoundList$smiles[i],
-          rt = compoundList$rt[i],
-          ccs = compoundList$ccs[i],
-          kegg = compoundList$kegg[i],
-          hmdb = compoundList$hmdb[i],
-          chebi = compoundList$chebi[i]
-        )
-
-        # add to list
-        newCompoundList <-
-          rbind.data.frame(newCompoundList, clipboard)
-      }
+  # iterate over compound list and add to dbupload
+  for (i in 1:nrow(compoundList)) {
+    if (grepl(",", compoundList$adducts[i])) {
+      adductList <- stringr::str_split(compoundList$adducts[i], ",")[[1]]
+    } else {
+      adductList <- compoundList$adducts[i]
     }
-  } else {
+
     # check if adduct names are correct
-    if (!all(adductList %in% getAdductNames())) {
+    if (!all(adductList %in% metabolomicsUtils::get_adduct_names())) {
       stop("One or more adduct name does not match the required adduct names.")
     }
 
-    print("commmon adducts")
 
-    for (i in 1:nrow(compoundList)) {
-      #check exact mass
-      if(is.na(compoundList$exactmass[i])) {
-        compoundList$exactmass[i] <- calculateExactMass(compoundList$formula[i])
-      }
+    #check exact mass
+    if(is.na(compoundList$exactmass[i])) {
+      #compoundList$exactmass[i] <- calculateExactMass(compoundList$formula[i])
+      compoundList$exactmass[i] <- metabolomicsUtils::formula_to_exactmass(compoundList$formula[i])
     }
 
     # iterate over adducts and create a query list
     for (adduct in adductList) {
       # generate list
       clipboard <- data.frame(
-        metaboliteID = compoundList$id,
+        metaboliteID = compoundList$id[i],
         adductType = adduct,
-        adductMass = compoundList$exactmass * as.numeric(adductCalc[[adduct]][1]) + as.numeric(adductCalc[[adduct]][2]),
-        neutralMass = compoundList$exactmass,
-        neutralFormula = compoundList$formula,
-        ionFormula = unlist(
-          lapply(compoundList$formula, calcAdductFormula, adduct = adduct)
-        ),
-        metaboliteName = stringr::str_c(compoundList$name, adduct, sep = " "),
-        inchikey = compoundList$inchikey,
-        inchi = compoundList$inchi,
-        smiles = compoundList$smiles,
-        rt = compoundList$rt,
-        ccs = compoundList$ccs,
-        kegg = compoundList$kegg,
-        hmdb = compoundList$hmdb,
-        chebi = compoundList$chebi
+        adductMass = metabolomicsUtils::calc_adduct_mass(compoundList$exactmass[i], adduct),
+        neutralMass = compoundList$exactmass[i],
+        neutralFormula = compoundList$formula[i],
+        ionFormula = metabolomicsUtils::create_ion_formula(compoundList$formula[i], adduct),
+        metaboliteName = stringr::str_c(compoundList$name[i], adduct, sep = " "),
+        inchikey = compoundList$inchikey[i],
+        inchi = compoundList$inchi[i],
+        smiles = compoundList$smiles[i],
+        rt = compoundList$rt[i],
+        ccs = compoundList$ccs[i],
+        kegg = compoundList$kegg[i],
+        hmdb = compoundList$hmdb[i],
+        chebi = compoundList$chebi[i]
       )
 
       # add to list
@@ -453,47 +347,65 @@ calculateAdductMasses <- function(compoundList, adductList) {
     }
   }
 
-  # return new compound list
   return(newCompoundList)
+
+
 
 }
 
-
 #'
 #'
 #'
-makeIsoName <- function(name, labeledElement, isoLabel, noOfLabel) {
+#'
+.create_list_common <- function(compoundList, adductList) {
 
-  if(length(noOfLabel) > 0 && noOfLabel == 0) {
-    return(name)
+  print("commmon adducts")
+
+  ############################################################################
+  # create required variables
+  ############################################################################
+  # data frame for final data
+  newCompoundList <- data.frame()
+
+  # check if adduct names are correct
+  if (!all(adductList %in% metabolomicsUtils::get_adduct_names())) {
+    stop("One or more adduct name does not match the required adduct names.")
   }
 
-  if(labeledElement == "C") {
-    labelString <- "13C"
-  } else if(labeledElement == "N") {
-    labelString <- "15N"
-  } else if(labeledElement == "D") {
-    labelString <- "2H"
-  } else if(labeledElement == "T") {
-    labelString <- "3H"
-  } else if(labeledElement == "S") {
-    labelString <- "34S"
-  } else if(labeledElement == "O") {
-    labelString <- "18O"
+  for (i in 1:nrow(compoundList)) {
+    #check exact mass
+    if(is.na(compoundList$exactmass[i])) {
+      compoundList$exactmass[i] <- calculateExactMass(compoundList$formula[i])
+    }
   }
 
-  # make cases
-  if(isoLabel == "full") {
+  # iterate over adducts and create a query list
+  for (adduct in adductList) {
+    # generate list
+    clipboard <- data.frame(
+      metaboliteID = compoundList$id,
+      adductType = adduct,
+      adductMass = metabolomicsUtils::calc_adduct_mass(compoundList$exactmass[i], adduct),
+      neutralMass = compoundList$exactmass,
+      neutralFormula = compoundList$formula,
+      ionFormula = metabolomicsUtils::create_ion_formula(compoundList$formula[i], adduct),
+      metaboliteName = stringr::str_c(compoundList$name, adduct, sep = " "),
+      inchikey = compoundList$inchikey,
+      inchi = compoundList$inchi,
+      smiles = compoundList$smiles,
+      rt = compoundList$rt,
+      ccs = compoundList$ccs,
+      kegg = compoundList$kegg,
+      hmdb = compoundList$hmdb,
+      chebi = compoundList$chebi
+    )
 
-    newName <- paste0("[U-", labelString, "] ", name)
-
-  } else if(isoLabel == "partial") {
-
-    newName <- paste0("[", labelString, noOfLabel, "] ", name)
-
+    # add to list
+    newCompoundList <-
+      rbind.data.frame(newCompoundList, clipboard)
   }
 
-  # return name
-  return(newName)
+  return(newCompoundList)
+
 
 }
