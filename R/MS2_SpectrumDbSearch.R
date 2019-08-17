@@ -14,9 +14,7 @@ searchByPrecursor <- function(precursorMz, ms2dbFileName, mzTol = 0.005, mzTolTy
     stop("invalid precursor type")
   }
 
-  ######################################################
   # m/z boundaries
-  ######################################################
   # calc lower and upper mz boundary
   if (mzTolType == "abs") {
     lowerMz <- precursorMz - mzTol
@@ -28,9 +26,7 @@ searchByPrecursor <- function(precursorMz, ms2dbFileName, mzTol = 0.005, mzTolTy
     stop("Unknown mzTolType defined!")
   }
 
-  ################################################################################
   # connect to DB and generate query
-  ################################################################################
   mydb <- DBI::dbConnect(RSQLite::SQLite(), ms2dbFileName)
 
   # generate query
@@ -143,6 +139,7 @@ createResultsSet <- function(querySpectrum, queryResults, align = TRUE, mzTol = 
 
   # loop over queryResults
   for(i in seq_along(queryResults)) {
+
     # perform spectral matching
     # forward matching
     forwardScore <- forwardDotProduct(querySpectrum, queryResults[[i]],
@@ -176,15 +173,17 @@ createResultsSet <- function(querySpectrum, queryResults, align = TRUE, mzTol = 
                        ".png")
 
     #plotPath <- dataPath
-
     print(plotPath)
-
-
 
     # make mirror plot
     makeMirrorPlot(querySpectrum, queryResults[[i]],
-                         align = align, mzTol = mzTol, treshold = treshold, title = title, plotIt = plotIt, savePlot = savePlot, fileName = plotPath)
-
+                   align = align,
+                   mzTol = mzTol,
+                   treshold = treshold,
+                   title = title,
+                   plotIt = plotIt,
+                   savePlot = savePlot,
+                   fileName = plotPath)
 
     # # store plot if TRUE
     # if(storePlot) {

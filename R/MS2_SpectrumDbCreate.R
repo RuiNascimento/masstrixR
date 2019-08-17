@@ -6,15 +6,11 @@
 #' @export
 createMs2Db <- function(librarySpectra, ms2dbFileName) {
 
-  ##############################################################################
   # get/generate required values
-  ##############################################################################
   # generate filename
   dbFileName <- paste0(ms2dbFileName, ".sqlite")
 
-  ##############################################################################
   # data frames for upload
-  ##############################################################################
   # data frames for different information
   metaData <- data.frame()
   spectra <- data.frame()
@@ -36,7 +32,9 @@ createMs2Db <- function(librarySpectra, ms2dbFileName) {
                                                  exactMass = librarySpectra@elementMetadata$exactMass[i],
                                                  inchi = librarySpectra@elementMetadata$inchi[i],
                                                  inchiKey = "",
-                                                 smiles = librarySpectra@elementMetadata$smiles[i]))
+                                                 smiles = librarySpectra@elementMetadata$smiles[i],
+                                                 rt = if(is.null(librarySpectra@elementMetadata$rt[i])) {0} else {librarySpectra@elementMetadata$rt[i]},
+                                                 ccs = if(is.null(librarySpectra@elementMetadata$ccs[i])) {0} else {librarySpectra@elementMetadata$ccs[i]}))
 
     spectra <- rbind.data.frame(spectra, cbind(intID = intID,
                                                id = librarySpectra@elementMetadata$id[i],
@@ -49,17 +47,14 @@ createMs2Db <- function(librarySpectra, ms2dbFileName) {
                                                  instrumentType = librarySpectra@elementMetadata$instrumentType[i],
                                                  msType = librarySpectra@elementMetadata$msType[i],
                                                  ionMode = librarySpectra@elementMetadata$ionMode[i],
-                                                 precursorMz = precursorMz(librarySpectra[[i]]),
-                                                 precursorType = librarySpectra@elementMetadata$precursorType[i],
-                                                 collisionEnergy = collisionEnergy(librarySpectra[[i]]),
-                                                 peaksCount = peaksCount(librarySpectra[[i]])))
+                                                 precursorMz = MSnbase::precursorMz(librarySpectra[[i]]),
+                                                 precursorType = MSnbase::librarySpectra@elementMetadata$precursorType[i],
+                                                 collisionEnergy = MSnbase::collisionEnergy(librarySpectra[[i]]),
+                                                 peaksCount = MSnbase::peaksCount(librarySpectra[[i]])))
 
   }
 
-
-  ##############################################################################
   # Generate SQLite DB
-  ##############################################################################
   # upload to DB
   mydb <- DBI::dbConnect(RSQLite::SQLite(), dbFileName)
   DBI::dbWriteTable(mydb, "metaData", metaData, overwrite = TRUE)
