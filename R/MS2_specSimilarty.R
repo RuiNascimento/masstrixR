@@ -75,24 +75,20 @@ commonPeaks <- function(x, y, align = FALSE, mzTol = 0.005, mzTolType = "abs", b
   if(align) {
 
     #use aligned spectra
-    alignedSpectra <- alignSpectra(x, y, mzTol = mzTol, mzTolType = mzTolType)
-
-    commonPeaks <- nrow(alignedSpectra[which(alignedSpectra$intensity.top > 0 & alignedSpectra$intensity.bottom > 0),])
-
-    # return number of common peaks
-    return(commonPeaks)
+    compared_spectra <- alignSpectra(x, y, mzTol = mzTol, mzTolType = mzTolType)
 
   } else {
 
     # use binned spectra
-    binnedSpectra <- bin_Spectra(x, y, ...)
-
-    commonPeaks <- nrow(binnedSpectra[which(binnedSpectra$intensity.top > 0 & binnedSpectra$intensity.bottom > 0),])
-
-    # return number of common peak
-    return(commonPeaks)
+    compared_spectra <- bin_Spectra(x, y, ...)
 
   }
+
+  commonPeaks <- nrow(compared_spectra[which(compared_spectra$intensity.top > 0 & compared_spectra$intensity.bottom > 0),])
+  commonPeaks <- nrow(compared_spectra[which(compared_spectra$intensity.top > 0 & compared_spectra$intensity.bottom > 0),])
+
+  # return number of common peak
+  return(commonPeaks)
 }
 
 #' Mass shift modified Dotproduct (GNPS)

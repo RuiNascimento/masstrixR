@@ -353,32 +353,32 @@ prepareCompoundList <-
     if(is.na(compoundList$exactmass[i])) {
       compoundList$exactmass[i] <- calculateExactMass(compoundList$formula[i])
     }
-  }
 
-  # iterate over adducts and create a query list
-  for (adduct in adductList) {
-    # generate list
-    clipboard <- data.frame(
-      metaboliteID = compoundList$id,
-      adductType = adduct,
-      adductMass = metabolomicsUtils::calc_adduct_mass(compoundList$exactmass[i], adduct),
-      neutralMass = compoundList$exactmass,
-      neutralFormula = compoundList$formula,
-      ionFormula = metabolomicsUtils::create_ion_formula(compoundList$formula[i], adduct),
-      metaboliteName = stringr::str_c(compoundList$name, adduct, sep = " "),
-      inchikey = compoundList$inchikey,
-      inchi = compoundList$inchi,
-      smiles = compoundList$smiles,
-      rt = compoundList$rt,
-      ccs = compoundList$ccs,
-      kegg = compoundList$kegg,
-      hmdb = compoundList$hmdb,
-      chebi = compoundList$chebi
-    )
+    # iterate over adducts and create a query list
+    for (adduct in adductList) {
+      # generate list
+      clipboard <- data.frame(
+        metaboliteID = compoundList$id[i],
+        adductType = adduct,
+        adductMass = metabolomicsUtils::calc_adduct_mass(compoundList$exactmass[i], adduct),
+        neutralMass = compoundList$exactmass[i],
+        neutralFormula = compoundList$formula[i],
+        ionFormula = metabolomicsUtils::create_ion_formula(compoundList$formula[i], adduct),
+        metaboliteName = stringr::str_c(compoundList$name[i], adduct, sep = " "),
+        inchikey = compoundList$inchikey[i],
+        inchi = compoundList$inchi[i],
+        smiles = compoundList$smiles[i],
+        rt = compoundList$rt[i],
+        ccs = compoundList$ccs[i],
+        kegg = compoundList$kegg[i],
+        hmdb = compoundList$hmdb[i],
+        chebi = compoundList$chebi[i]
+      )
 
-    # add to list
-    newCompoundList <-
-      rbind.data.frame(newCompoundList, clipboard)
+      # add to list
+      newCompoundList <-
+        rbind.data.frame(newCompoundList, clipboard)
+    }
   }
 
   return(newCompoundList)

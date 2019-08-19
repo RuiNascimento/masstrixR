@@ -9,6 +9,9 @@
 #' @export
 searchByPrecursor <- function(precursorMz, ms2dbFileName, mzTol = 0.005, mzTolType = "abs", precursorType = NA) {
 
+  # no further continued
+  .Deprecated(msg = "'searchByPrecurosr' will be removed in the next version")
+
   # some sanity checks
   if(!is.na(precursorType) & !any(precursorType %in% getAdductNames())) {
     stop("invalid precursor type")
@@ -125,91 +128,6 @@ searchByPrecursor <- function(precursorMz, ms2dbFileName, mzTol = 0.005, mzTolTy
   # return search results as Spectra object
   return(librarySearchResults)
 }
-
-#' Function that calculates scores for a query and a list of result spectra
-#' @param querySpectrum A Spectrum2 object
-#' @param queryResults A Spectra object containing the results from a DB search
-#'
-#' @export
-createResultsSet <- function(querySpectrum, queryResults, align = TRUE, mzTol = 0.005, mzTolType = "abs",
-                             plotIt = TRUE, savePlot = FALSE, prefix = "", dataPath = "", title = NA) {
-
-  # create empty data for results
-  resultSet <- data.frame()
-
-  # loop over queryResults
-  for(i in seq_along(queryResults)) {
-
-    # perform spectral matching
-    # forward matching
-    forwardScore <- forwardDotProduct(querySpectrum, queryResults[[i]],
-                                     align = align, mzTol = mzTol, mzTolType = mzTolType)
-
-    # reverse matching
-    reverseScore <- reverseDotProduct(querySpectrum, queryResults[[i]],
-                                     align = align, mzTol = mzTol, mzTolType = mzTolType)
-
-    # number of common peaks
-    matchingPeaks <- commonPeaks(querySpectrum, queryResults[[i]],
-                                 align = align, mzTol = mzTol, mzTolType = mzTolType)
-
-    noPeaks_querySpectrum <- length(mz(querySpectrum))
-    noPeaks_queryResult <- length(mz(queryResults[[i]]))
-
-    if(is.na(title)) {
-      title <- paste0(prefix, " / ",
-                      queryResults[i]@elementMetadata$name,
-                      ", forward: ",
-                      round(forwardScore * 1000, 0),
-                      " / reverse: ",
-                      round(forwardScore * 1000, 0))
-    }
-
-    print(dataPath)
-
-    plotPath <- paste0(dataPath,
-                       "\\",
-                       make.names(paste0(prefix, "_", queryResults[i]@elementMetadata$name)),
-                       ".png")
-
-    #plotPath <- dataPath
-    print(plotPath)
-
-    # make mirror plot
-    makeMirrorPlot(querySpectrum, queryResults[[i]],
-                   align = align,
-                   mzTol = mzTol,
-                   treshold = treshold,
-                   title = title,
-                   plotIt = plotIt,
-                   savePlot = savePlot,
-                   fileName = plotPath)
-
-    # # store plot if TRUE
-    # if(storePlot) {
-    #   plotPath <- paste0(dataPath, "\\",
-    #                      make.names(paste0(prefix,
-    #                                        "_",
-    #                                        queryResults[i]@elementMetadata$name),
-    #                                 ".png"))
-    #   dev.copy(png, plotName, width = 1000, height = 500)
-    #   dev.off()
-    # }
-
-    # add to result set
-    resultSet <- rbind.data.frame(resultSet, cbind.data.frame(prefix = prefix,
-                                                              name = queryResults[i]@elementMetadata$name,
-                                                              forwardScore = forwardScore,
-                                                              reverseScore = reverseScore,
-                                                              matchingPeaks = matchingPeaks,
-                                                              noPeaks_query = noPeaks_querySpectrum,
-                                                              noPeaks_library = noPeaks_queryResult))
-  }
-
-  # return result set
-  return(resultSet)
-}
-
 
 
 #' Function to find MS2 spectra in a MS2 library for spectral matching. The search parameters are a given precursor m/z and potentially its type of adduct.
@@ -383,3 +301,135 @@ search_by_precursor <- function(ms2dbFileName, mode = "onDisk",
   return(librarySearchResults)
 }
 
+
+
+
+#' Function that calculates scores for a query and a list of result spectra
+#' @param querySpectrum A Spectrum2 object
+#' @param queryResults A Spectra object containing the results from a DB search
+#'
+#' @export
+createResultsSet <- function(querySpectrum, queryResults, align = TRUE, mzTol = 0.005, mzTolType = "abs",
+                             plotIt = TRUE, savePlot = FALSE, prefix = "", dataPath = "", title = NA) {
+
+  .Deprecated(msg = "'createResultSet' will be removed in the next version")
+
+  # create empty data for results
+  resultSet <- data.frame()
+
+  # loop over queryResults
+  for(i in seq_along(queryResults)) {
+
+    # perform spectral matching
+    # forward matching
+    forwardScore <- forwardDotProduct(querySpectrum, queryResults[[i]],
+                                     align = align, mzTol = mzTol, mzTolType = mzTolType)
+
+    # reverse matching
+    reverseScore <- reverseDotProduct(querySpectrum, queryResults[[i]],
+                                     align = align, mzTol = mzTol, mzTolType = mzTolType)
+
+    # number of common peaks
+    matchingPeaks <- commonPeaks(querySpectrum, queryResults[[i]],
+                                 align = align, mzTol = mzTol, mzTolType = mzTolType)
+
+    noPeaks_querySpectrum <- length(mz(querySpectrum))
+    noPeaks_queryResult <- length(mz(queryResults[[i]]))
+
+    if(is.na(title)) {
+      title <- paste0(prefix, " / ",
+                      queryResults[i]@elementMetadata$name,
+                      ", forward: ",
+                      round(forwardScore * 1000, 0),
+                      " / reverse: ",
+                      round(forwardScore * 1000, 0))
+    }
+
+    print(dataPath)
+
+    plotPath <- paste0(dataPath,
+                       "\\",
+                       make.names(paste0(prefix, "_", queryResults[i]@elementMetadata$name)),
+                       ".png")
+
+    #plotPath <- dataPath
+    print(plotPath)
+
+    # make mirror plot
+    makeMirrorPlot(querySpectrum, queryResults[[i]],
+                   align = align,
+                   mzTol = mzTol,
+                   treshold = treshold,
+                   title = title,
+                   plotIt = plotIt,
+                   savePlot = savePlot,
+                   fileName = plotPath)
+
+    # # store plot if TRUE
+    # if(storePlot) {
+    #   plotPath <- paste0(dataPath, "\\",
+    #                      make.names(paste0(prefix,
+    #                                        "_",
+    #                                        queryResults[i]@elementMetadata$name),
+    #                                 ".png"))
+    #   dev.copy(png, plotName, width = 1000, height = 500)
+    #   dev.off()
+    # }
+
+    # add to result set
+    resultSet <- rbind.data.frame(resultSet, cbind.data.frame(prefix = prefix,
+                                                              name = queryResults[i]@elementMetadata$name,
+                                                              forwardScore = forwardScore,
+                                                              reverseScore = reverseScore,
+                                                              matchingPeaks = matchingPeaks,
+                                                              noPeaks_query = noPeaks_querySpectrum,
+                                                              noPeaks_library = noPeaks_queryResult))
+  }
+
+  # return result set
+  return(resultSet)
+}
+
+
+#' Function that calculates scores for a query and a list of result spectra
+#' @param querySpectrum A Spectrum2 object
+#' @param queryResults A Spectra object containing the results from a DB search
+#'
+#' @export
+create_results_set <- function(querySpectrum, queryResults, align = TRUE, mzTol = 0.005, mzTolType = "abs") {
+
+  # create empty data for results
+  resultSet <- data.frame()
+
+  # loop over queryResults
+  for(i in seq_along(queryResults)) {
+
+    # perform spectral matching
+    # forward matching
+    forwardScore <- forwardDotProduct(querySpectrum, queryResults[[i]],
+                                      align = align, mzTol = mzTol, mzTolType = mzTolType)
+
+    # reverse matching
+    reverseScore <- reverseDotProduct(querySpectrum, queryResults[[i]],
+                                      align = align, mzTol = mzTol, mzTolType = mzTolType)
+
+    # number of common peaks
+    matchingPeaks <- commonPeaks(querySpectrum, queryResults[[i]],
+                                 align = align, mzTol = mzTol, mzTolType = mzTolType)
+
+    noPeaks_querySpectrum <- length(mz(querySpectrum))
+    noPeaks_queryResult <- length(mz(queryResults[[i]]))
+
+    # add to result set
+    resultSet <- rbind.data.frame(resultSet, cbind.data.frame(prefix = prefix,
+                                                              name = queryResults[i]@elementMetadata$name,
+                                                              forwardScore = forwardScore,
+                                                              reverseScore = reverseScore,
+                                                              matchingPeaks = matchingPeaks,
+                                                              noPeaks_query = noPeaks_querySpectrum,
+                                                              noPeaks_library = noPeaks_queryResult))
+  }
+
+  # return result set
+  return(resultSet)
+}

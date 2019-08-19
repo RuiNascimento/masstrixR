@@ -1,7 +1,7 @@
 Package: masstrixR
 Type: Package
 Title: Annotation of MS based metabolomics data
-Version: 1.0.0
+Version: 1.1.0
 Author: Michael Witting
 Maintainer: Michael Witting <michael.witting@helmholtz-muenchen.de>
 Description: The masstrixR package helps with annotation of MS1 data with potential metabolites. It was specifically develop to improve annotation and results from Genedata Expressionist for MS 11.0, but can be used with any LC-MS based data.
