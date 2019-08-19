@@ -17,10 +17,10 @@ test_that("checked that different adduct ions are matched correctly", {
   neg_adducts <- c("[M-H]-")
   pos_adducts <- c("[M+H]+", "[M+Na]+", "[M+NH4]+")
 
-  mzNeg <- 179.055014
-  mzPos <- 203.052609
+  mz_neg <- 179.055014
+  mz_pos <- 203.052609
 
   # negative mode, multiple charge
-  expect_equal(match_mz_inter(mzPos, mzNeg, pos_adducts, neg_adducts), "[M+Na]+<->[M-H]-")
+  expect_equal(match_mz_inter(mz_pos, mz_neg, pos_adducts, neg_adducts), "[M+Na]+<->[M-H]-")
 
 })
