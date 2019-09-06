@@ -27,7 +27,7 @@ createMs2Db <- function(librarySpectra, ms2dbFileName) {
     metaData <- rbind.data.frame(metaData, cbind(intID = intID,
                                                  id = librarySpectra@elementMetadata$id[i],
                                                  name = librarySpectra@elementMetadata$name[i],
-                                                 formula = standardizeChemFormula(librarySpectra@elementMetadata$formula[i]),
+                                                 formula = librarySpectra@elementMetadata$formula[i],
                                                  precursorType = librarySpectra@elementMetadata$precursorType[i],
                                                  exactMass = librarySpectra@elementMetadata$exactMass[i],
                                                  inchi = librarySpectra@elementMetadata$inchi[i],
@@ -48,7 +48,7 @@ createMs2Db <- function(librarySpectra, ms2dbFileName) {
                                                  msType = librarySpectra@elementMetadata$msType[i],
                                                  ionMode = librarySpectra@elementMetadata$ionMode[i],
                                                  precursorMz = MSnbase::precursorMz(librarySpectra[[i]]),
-                                                 precursorType = MSnbase::librarySpectra@elementMetadata$precursorType[i],
+                                                 precursorType = librarySpectra@elementMetadata$precursorType[i],
                                                  collisionEnergy = MSnbase::collisionEnergy(librarySpectra[[i]]),
                                                  peaksCount = MSnbase::peaksCount(librarySpectra[[i]])))
 

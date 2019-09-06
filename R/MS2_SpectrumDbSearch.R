@@ -13,7 +13,7 @@ searchByPrecursor <- function(precursorMz, ms2dbFileName, mzTol = 0.005, mzTolTy
   .Deprecated(msg = "'searchByPrecurosr' will be removed in the next version")
 
   # some sanity checks
-  if(!is.na(precursorType) & !any(precursorType %in% getAdductNames())) {
+  if(!is.na(precursorType) & !any(precursorType %in% metabolomicsUtils::get_adduct_names(mode = "all"))) {
     stop("invalid precursor type")
   }
 
@@ -396,33 +396,38 @@ createResultsSet <- function(querySpectrum, queryResults, align = TRUE, mzTol = 
 #' @param queryResults A Spectra object containing the results from a DB search
 #'
 #' @export
-create_results_set <- function(querySpectrum, queryResults, align = TRUE, mzTol = 0.005, mzTolType = "abs") {
+create_results_set <- function(query_spectrum, result_spectra, align = TRUE, mzTol = 0.005, mzTolType = "abs") {
 
   # create empty data for results
   resultSet <- data.frame()
 
-  # loop over queryResults
-  for(i in seq_along(queryResults)) {
+  # loop over result_spectra
+  for(i in seq_along(result_spectra)) {
+
+    # information about matching precursors
+    precursorDiff_abs <- abs(precursorMz(query_spectrum) - precursorMz(result_spectra[[i]]))
+    precursorDiff_ppm <- abs((precursorMz(query_spectrum) - precursorMz(result_spectra[[i]])) / precursorMz(result_spectra[[i]]) * 1e6)
 
     # perform spectral matching
     # forward matching
-    forwardScore <- forwardDotProduct(querySpectrum, queryResults[[i]],
+    forwardScore <- forward_dotproduct(query_spectrum, result_spectra[[i]],
                                       align = align, mzTol = mzTol, mzTolType = mzTolType)
 
     # reverse matching
-    reverseScore <- reverseDotProduct(querySpectrum, queryResults[[i]],
+    reverseScore <- reverse_dotproduct(query_spectrum, result_spectra[[i]],
                                       align = align, mzTol = mzTol, mzTolType = mzTolType)
 
     # number of common peaks
-    matchingPeaks <- commonPeaks(querySpectrum, queryResults[[i]],
+    matchingPeaks <- common_peaks(query_spectrum, result_spectra[[i]],
                                  align = align, mzTol = mzTol, mzTolType = mzTolType)
 
-    noPeaks_querySpectrum <- length(mz(querySpectrum))
-    noPeaks_queryResult <- length(mz(queryResults[[i]]))
+    noPeaks_querySpectrum <- length(mz(query_spectrum))
+    noPeaks_queryResult <- length(mz(result_spectra[[i]]))
 
     # add to result set
-    resultSet <- rbind.data.frame(resultSet, cbind.data.frame(prefix = prefix,
-                                                              name = queryResults[i]@elementMetadata$name,
+    resultSet <- rbind.data.frame(resultSet, cbind.data.frame(result_name = result_spectra[i]@elementMetadata$name,
+                                                              precursorDiff_abs = precursorDiff_abs,
+                                                              precursorDiff_ppm = precursorDiff_ppm,
                                                               forwardScore = forwardScore,
                                                               reverseScore = reverseScore,
                                                               matchingPeaks = matchingPeaks,
