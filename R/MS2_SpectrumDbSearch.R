@@ -396,7 +396,7 @@ createResultsSet <- function(querySpectrum, queryResults, align = TRUE, mzTol = 
 #' @param queryResults A Spectra object containing the results from a DB search
 #'
 #' @export
-create_results_set <- function(query_spectrum, result_spectra, align = TRUE, mzTol = 0.005, mzTolType = "abs") {
+create_results_set <- function(query_spectrum, result_spectra, align = TRUE, mzTol = 0.005, mzTolType = "abs", prefix = "") {
 
   # create empty data for results
   resultSet <- data.frame()
@@ -425,7 +425,8 @@ create_results_set <- function(query_spectrum, result_spectra, align = TRUE, mzT
     noPeaks_queryResult <- length(mz(result_spectra[[i]]))
 
     # add to result set
-    resultSet <- rbind.data.frame(resultSet, cbind.data.frame(result_name = result_spectra[i]@elementMetadata$name,
+    resultSet <- rbind.data.frame(resultSet, cbind.data.frame(prefix = prefix,
+                                                              result_name = result_spectra[i]@elementMetadata$name,
                                                               precursorDiff_abs = precursorDiff_abs,
                                                               precursorDiff_ppm = precursorDiff_ppm,
                                                               forwardScore = forwardScore,
