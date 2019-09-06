@@ -4,7 +4,7 @@
 \alias{create_results_set}
 \title{Function that calculates scores for a query and a list of result spectra}
 \usage{
-create_results_set(querySpectrum, queryResults, align = TRUE,
+create_results_set(query_spectrum, result_spectra, align = TRUE,
   mzTol = 0.005, mzTolType = "abs")
 }
 \arguments{
