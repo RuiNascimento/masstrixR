@@ -135,8 +135,8 @@ mzSearch <- function(peakList, dbFileName, mode = "onDisk",
       lowerRt <- peakList$RT[i] - rtTol
       upperRt <- peakList$RT[i] + rtTol
     } else if (rt == TRUE & rtTolType == "rel") {
-      lowerRt <- peakList$RT[i] - peakList$RT[i] * rtTol
-      upperRt <- peakList$RT[i] + peakList$RT[i] * rtTol
+      lowerRt <- peakList$RT[i] - peakList$RT[i] * rtTol / 100
+      upperRt <- peakList$RT[i] + peakList$RT[i] * rtTol / 100
     } else if (rt == TRUE) {
       stop("unknown rtTolTyp defined!")
     }
@@ -149,8 +149,8 @@ mzSearch <- function(peakList, dbFileName, mode = "onDisk",
       lowerCcs <- peakList$CCS[i] - ccsTol
       upperCcs <- peakList$CCS[i] + ccsTol
     } else if (ccs == TRUE & ccsTolType == "rel") {
-      lowerCcs <- peakList$CCS[i] - peakList$CCS[i] * ccsTolType
-      upperCcs <- peakList$CCS[i] + peakList$CCS[i] * ccsTolType
+      lowerCcs <- peakList$CCS[i] - peakList$CCS[i] * ccsTol / 100
+      upperCcs <- peakList$CCS[i] + peakList$CCS[i] * ccsTol / 100
     } else if (ccs == TRUE) {
       stop("unknown rtTolTyp defined!")
     }
@@ -224,7 +224,7 @@ mzSearch <- function(peakList, dbFileName, mode = "onDisk",
   if (rt == TRUE) {
 
     ms1annotation$rtAbsError <- ms1annotation$RT - ms1annotation$rt_db
-    ms1annotation$rtRelError <- (ms1annotation$RT - ms1annotation$rt_db) / ms1annotation$rt_db
+    ms1annotation$rtRelError <- (ms1annotation$RT - ms1annotation$rt_db) / ms1annotation$rt_db * 100
 
   } else {
 
@@ -237,7 +237,7 @@ mzSearch <- function(peakList, dbFileName, mode = "onDisk",
   if (ccs == TRUE) {
 
     ms1annotation$ccsAbsError <- ms1annotation$CCS - ms1annotation$ccs_db
-    ms1annotation$ccsRelError <- (ms1annotation$CCS - ms1annotation$ccs_db) / ms1annotation$ccs_db
+    ms1annotation$ccsRelError <- (ms1annotation$CCS - ms1annotation$ccs_db) / ms1annotation$ccs_db * 100
 
   } else {
 

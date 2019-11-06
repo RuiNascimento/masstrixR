@@ -106,13 +106,11 @@ match_mz_inter <- function(posMz, negMz, posAdducts, negAdducts, mzTol = 0.005, 
 
   # sanity checks
   # check if adduct definitions are good
-  adduct_names <- metabolomicsUtils::get_adduct_names(mode = "all")
-
-  if(!all(posAdducts %in% adduct_names)) {
+  if(!all(posAdducts %in% metabolomicsUtils::get_adduct_names(mode = "positive"))) {
     stop("one or more adducts in the posAdducts in not fitting")
   }
 
-  if(!all(negAdducts %in% adduct_names)) {
+  if(!all(negAdducts %in% metabolomicsUtils::get_adduct_names(mode = "negative"))) {
     stop("one or more adducts in the negAdducts in not fitting")
   }
 
@@ -125,38 +123,34 @@ match_mz_inter <- function(posMz, negMz, posAdducts, negAdducts, mzTol = 0.005, 
                    posMz = posMz,
                    negMz = negMz, stringsAsFactors = FALSE)
 
-  # iterate and calculate all combinatoins
-  for(i in 1:nrow(df)) {
+  df$neutral_from_pos <- mapply(metabolomicsUtils::calc_neutral_mass, ion_mass = df$posMz, adduct = df$posAdduct)
+  df$neutral_from_neg <- mapply(metabolomicsUtils::calc_neutral_mass, ion_mass = df$negMz, adduct = df$negAdduct)
+  df$neg_from_pos <- mapply(metabolomicsUtils::calc_adduct_mass, exact_mass = df$neutral_from_pos, adduct = df$negAdduct)
+  df$pos_from_neg <- mapply(metabolomicsUtils::calc_adduct_mass, exact_mass = df$neutral_from_neg, adduct = df$posAdduct)
 
-    # from pos to neg
-    df$neutral_from_pos[i] <- metabolomicsUtils::calc_neutral_mass(df$posMz[i], df$posAdduct[i])
-    df$neutral_from_neg[i] <- metabolomicsUtils::calc_neutral_mass(df$negMz[i], df$negAdduct[i])
+  df$match <- mapply(function(pos, neg) {paste0(pos, "<->", neg)}, pos = df$posAdduct, neg = df$negAdduct)
 
-    df$neg_from_pos[i] <- metabolomicsUtils::calc_adduct_mass(df$neutral_from_pos[i], df$negAdduct[i])
-    df$pos_from_neg[i] <- metabolomicsUtils::calc_adduct_mass(df$neutral_from_neg[i], df$posAdduct[i])
-
-  }
+  df$neg_diff <- abs(df$negMz - df$neg_from_pos)
+  df$pos_diff <- abs(df$posMz - df$pos_from_neg)
 
   # select fitting adducts
   if(mzTolType == "abs") {
-    filteredDf <- df[which(abs(df$negMz - df$neg_from_pos) < mzTol & abs(df$posMz - df$pos_from_neg) < mzTol),]
+
+    filteredDf <- df[which(df$neg_diff < mzTol & df$pos_diff < mzTol),]
+
   } else if(mzTolType == "ppm") {
+
     filteredDf <- NULL
+
   } else {
+
     stop("unknown mzTolType")
+
   }
 
   if(!is.null(filteredDf) & nrow(filteredDf) > 0) {
-    matchingResult <- ""
 
-    for(i in 1:nrow(filteredDf)) {
-
-      if(i == 1) {
-        matchingResult <- paste0(filteredDf$posAdduct[i], "<->", filteredDf$negAdduct[i])
-      } else {
-        matchingResult <- paste0(matchingResult, " / ", filteredDf$posAdduct[i], "<->", filteredDf$negAdduct[i])
-      }
-    }
+    matchingResult <- paste0(filteredDf$match, collapse = " / ")
 
     # return resulting DF
     return(matchingResult)

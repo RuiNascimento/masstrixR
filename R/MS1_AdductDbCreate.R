@@ -353,6 +353,8 @@ prepareCompoundList <-
     if(is.na(compoundList$exactmass[i])) {
       compoundList$exactmass[i] <- calculateExactMass(compoundList$formula[i])
     }
+
+
   }
 
   # iterate over adducts and create a query list
@@ -361,10 +363,11 @@ prepareCompoundList <-
     clipboard <- data.frame(
       metaboliteID = compoundList$id,
       adductType = adduct,
-      adductMass = metabolomicsUtils::calc_adduct_mass(compoundList$exactmass[i], adduct),
+      adductMass = unlist(lapply(compoundList$exactmass, metabolomicsUtils::calc_adduct_mass, adduct = adduct)),
       neutralMass = compoundList$exactmass,
       neutralFormula = compoundList$formula,
-      ionFormula = metabolomicsUtils::create_ion_formula(compoundList$formula[i], adduct),
+      ionFormula = unlist(lapply(compoundList$formula, metabolomicsUtils::create_ion_formula, adduct = adduct)),
+      #ionFormula = metabolomicsUtils::create_ion_formula(compoundList$formula, adduct),
       metaboliteName = stringr::str_c(compoundList$name, adduct, sep = " "),
       inchikey = compoundList$inchikey,
       inchi = compoundList$inchi,
