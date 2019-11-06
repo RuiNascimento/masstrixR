@@ -5,7 +5,7 @@
 \title{Function that calculates scores for a query and a list of result spectra}
 \usage{
 create_results_set(query_spectrum, result_spectra, align = TRUE,
-  mzTol = 0.005, mzTolType = "abs")
+  mzTol = 0.005, mzTolType = "abs", prefix = "")
 }
 \arguments{
 \item{querySpectrum}{A Spectrum2 object}
