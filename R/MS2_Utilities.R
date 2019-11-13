@@ -523,3 +523,30 @@ clean_spectrum <- function(x, cleanFunction = "removeAbovePrecursor", treshold, 
   return(cleanedSpec)
 
 }
+
+#'
+#'
+#' @export
+create_nl_spectrum <- function(x) {
+
+  # get mz and int values
+  mz_old <- mz(x)
+  int_old <- intensity(x)
+
+  # get precursor
+  precursor <- precursorMz(x)
+
+  # filter to only contain values below precursor
+  mz_new <- mz_old[which(mz_old < precursor)]
+  int_new <- int_old[which(mz_old < precursor)]
+
+  # calculate all NL
+  mz_nl <- precursor - mz_new
+  int_nl <- int_new
+
+  # change in object
+  x@mz <- mz_nl
+  x@intensity <- int_nl
+  x@peaksCount <- length(mz_nl)
+
+}
