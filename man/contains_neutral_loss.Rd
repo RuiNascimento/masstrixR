@@ -4,8 +4,12 @@
 \alias{contains_neutral_loss}
 \title{This function allows to search for a fragment m/z in MS2 spectra that match to a specified neutral from the precusor}
 \usage{
-contains_neutral_loss(ms2spectrum, neutralLossMass, mzTol = 0.005,
-  mzTolType = "abs")
+contains_neutral_loss(
+  ms2spectrum,
+  neutralLossMass,
+  mzTol = 0.005,
+  mzTolType = "abs"
+)
 }
 \arguments{
 \item{ms2spectrum}{A Spectrum2 in which the production ion shall be searched}

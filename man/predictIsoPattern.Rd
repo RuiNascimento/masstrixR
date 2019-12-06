@@ -4,8 +4,13 @@
 \alias{predictIsoPattern}
 \title{Prediction of isotope pattern}
 \usage{
-predictIsoPattern(ionFormula, charge, plotit = FALSE, treshold = 0.01,
-  resolution = 50000)
+predictIsoPattern(
+  ionFormula,
+  charge,
+  plotit = FALSE,
+  treshold = 0.01,
+  resolution = 50000
+)
 }
 \arguments{
 \item{ionFormula}{The formula of the ion for which the isotopic pattern shall be calculated, e.g. C6H12O6Na for the M+Na adduct of glucose}

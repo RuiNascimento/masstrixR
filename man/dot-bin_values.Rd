@@ -4,8 +4,13 @@
 \alias{.bin_values}
 \title{binning function (based on MSnbase)}
 \usage{
-.bin_values(x, toBin, binSize = 1, breaks = seq(floor(min(toBin)),
-  ceiling(max(toBin)), by = binSize), fun = max)
+.bin_values(
+  x,
+  toBin,
+  binSize = 1,
+  breaks = seq(floor(min(toBin)), ceiling(max(toBin)), by = binSize),
+  fun = max
+)
 }
 \description{
 binning function (based on MSnbase)

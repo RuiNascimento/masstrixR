@@ -4,8 +4,15 @@
 \alias{common_peaks}
 \title{Calculate common peaks}
 \usage{
-common_peaks(x, y, align = FALSE, mzTol = 0.005, mzTolType = "abs",
-  binwidth = 1L, ...)
+common_peaks(
+  x,
+  y,
+  align = FALSE,
+  mzTol = 0.005,
+  mzTolType = "abs",
+  binwidth = 1L,
+  ...
+)
 }
 \description{
 Calculate common peaks

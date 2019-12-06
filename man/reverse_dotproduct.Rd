@@ -4,8 +4,15 @@
 \alias{reverse_dotproduct}
 \title{Calculate reverse Dotproduct}
 \usage{
-reverse_dotproduct(x, y, align = FALSE, mzTol = 0.005,
-  mzTolType = "abs", binwidth = 1L, ...)
+reverse_dotproduct(
+  x,
+  y,
+  align = FALSE,
+  mzTol = 0.005,
+  mzTolType = "abs",
+  binwidth = 1L,
+  ...
+)
 }
 \description{
 Calculate reverse Dotproduct

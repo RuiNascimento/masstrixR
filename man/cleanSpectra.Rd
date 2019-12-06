@@ -4,8 +4,14 @@
 \alias{cleanSpectra}
 \title{This function is used to clean MS2 spectra in different ways. First, if the MS2 contains "fragment" m/z values above the precursor m/z (option "removeAbovePrecursor"). Second, isotopic peaks in the MS2 spectra can be removed ("isotopeFilitering"). Lastly, peaks below a certain treshold are removed ("tresholdFiltering").}
 \usage{
-cleanSpectra(x, cleanFunction = "removeAbovePrecursor", treshold,
-  precursorDistance = 5, mzTol = 0.005, mzTolType = "abs")
+cleanSpectra(
+  x,
+  cleanFunction = "removeAbovePrecursor",
+  treshold,
+  precursorDistance = 5,
+  mzTol = 0.005,
+  mzTolType = "abs"
+)
 }
 \arguments{
 \item{x}{A Spectrum2 object to work on}

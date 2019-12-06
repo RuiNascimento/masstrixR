@@ -4,8 +4,13 @@
 \alias{contains_product_ion}
 \title{This function allows to search for a specific product ion in MS2 spectra}
 \usage{
-contains_product_ion(ms2spectrum, productIonMz, mzTol = 0.005,
-  mzTolType = "abs", multiplePi = "any")
+contains_product_ion(
+  ms2spectrum,
+  productIonMz,
+  mzTol = 0.005,
+  mzTolType = "abs",
+  multiplePi = "any"
+)
 }
 \arguments{
 \item{ms2spectrum}{A Spectrum2 in which the production ion shall be searched}

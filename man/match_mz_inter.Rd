@@ -4,8 +4,14 @@
 \alias{match_mz_inter}
 \title{Checking masses from different ion modes}
 \usage{
-match_mz_inter(posMz, negMz, posAdducts, negAdducts, mzTol = 0.005,
-  mzTolType = "abs")
+match_mz_inter(
+  posMz,
+  negMz,
+  posAdducts,
+  negAdducts,
+  mzTol = 0.005,
+  mzTolType = "abs"
+)
 }
 \arguments{
 \item{posMz}{m/z value of positive ionization mode}

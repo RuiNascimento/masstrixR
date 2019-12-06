@@ -4,8 +4,15 @@
 \alias{forwardDotProduct}
 \title{Calculate forward Dotproduct}
 \usage{
-forwardDotProduct(x, y, align = FALSE, mzTol = 0.005,
-  mzTolType = "abs", binwidth = 1L, ...)
+forwardDotProduct(
+  x,
+  y,
+  align = FALSE,
+  mzTol = 0.005,
+  mzTolType = "abs",
+  binwidth = 1L,
+  ...
+)
 }
 \description{
 Calculate forward Dotproduct

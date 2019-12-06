@@ -4,8 +4,13 @@
 \alias{bin_Spectrum}
 \title{Function to bin a single spectrum (based on MSnbase)}
 \usage{
-bin_Spectrum(object, binSize = 1L, breaks = seq(floor(min(mz(object))),
-  ceiling(max(mz(object))), by = binSize), fun = sum, msLevel.)
+bin_Spectrum(
+  object,
+  binSize = 1L,
+  breaks = seq(floor(min(mz(object))), ceiling(max(mz(object))), by = binSize),
+  fun = sum,
+  msLevel.
+)
 }
 \description{
 Function to bin a single spectrum (based on MSnbase)

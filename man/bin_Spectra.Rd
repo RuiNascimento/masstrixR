@@ -4,9 +4,13 @@
 \alias{bin_Spectra}
 \title{Function to bin spectra on common bins}
 \usage{
-bin_Spectra(x, y, binSize = 1L, breaks = seq(floor(min(c(mz(x),
-  mz(y)))), ceiling(max(c(mz(x), mz(y)))), by = binSize),
-  returnSpectra = FALSE)
+bin_Spectra(
+  x,
+  y,
+  binSize = 1L,
+  breaks = seq(floor(min(c(mz(x), mz(y)))), ceiling(max(c(mz(x), mz(y)))), by = binSize),
+  returnSpectra = FALSE
+)
 }
 \description{
 Function to bin spectra on common bins

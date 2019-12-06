@@ -7,8 +7,13 @@ ased on the code contributed by Guangchuang Yu \email{guangchuangyu@gmail.com}
 Modified by Sebastian Gibb \email{mail@sebastiangibb.de}
 Modified by Michael Witting \email{michael.witting@helmholtz-muenchen.de}}
 \usage{
-readAnnotatedMgfData(filename, filterAddFields = NULL,
-  centroided = TRUE, smoothed = FALSE, cache = 1)
+readAnnotatedMgfData(
+  filename,
+  filterAddFields = NULL,
+  centroided = TRUE,
+  smoothed = FALSE,
+  cache = 1
+)
 }
 \description{
 This function allows to read mgf files which contain additional fields to standard

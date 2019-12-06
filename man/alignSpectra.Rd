@@ -4,8 +4,7 @@
 \alias{alignSpectra}
 \title{Function to align a spectra to a reference spectrum, e.g. library spectrum}
 \usage{
-alignSpectra(x, y, mzTol = 0.005, mzTolType = "abs",
-  returnSpectra = FALSE)
+alignSpectra(x, y, mzTol = 0.005, mzTolType = "abs", returnSpectra = FALSE)
 }
 \description{
 Function to align a spectra to a reference spectrum, e.g. library spectrum

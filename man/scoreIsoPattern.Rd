@@ -4,8 +4,11 @@
 \alias{scoreIsoPattern}
 \title{Function to score isotope pattern}
 \usage{
-scoreIsoPattern(filteredAnnotationResult, measuredIsotopePattern,
-  returnPredicted = FALSE)
+scoreIsoPattern(
+  filteredAnnotationResult,
+  measuredIsotopePattern,
+  returnPredicted = FALSE
+)
 }
 \description{
 Function to score isotope pattern
